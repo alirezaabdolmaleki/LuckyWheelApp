@@ -54,7 +54,7 @@ This project implements a Lucky Wheel feature for a festival. Users can spin the
 
 - **URL:** `/api/v1/lucky-wheel/`
 - **Method:** `GET`
-- **Middleware:** `auth`
+- **Middleware:** `login`
 
 #### Response
 
@@ -62,6 +62,13 @@ This project implements a Lucky Wheel feature for a festival. Users can spin the
   ```json
   {
     "title": "X"
+  }
+  ```
+
+- **Award Out of Stock (409):**
+  ```json
+  {
+    "error": "Award out of stock"
   }
   ```
 
@@ -75,7 +82,7 @@ This project implements a Lucky Wheel feature for a festival. Users can spin the
 - **All Prizes Out of Stock (503):**
   ```json
   {
-    "error": "No prizes available"
+    "error": "No awards available"
   }
   ```
 
