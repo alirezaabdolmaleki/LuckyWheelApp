@@ -22,10 +22,13 @@ class LuckyWheelController extends Controller {
             return response()->json(['error' => 'Insufficient points'], 422);
         }
 
+        DB::beginTransaction();
         try {
             $awards = Awards::where('inventory', '>', 0)->lockForUpdate()->get();
-            if ($awards->isEmpty())
+            if ($awards->isEmpty()) {
+                DB::rollBack();
                 return response()->json(['error' => 'No awards available'], 503);
+            }
 
             $totalCoefficient = $awards->sum('coefficient');
             $randomValue = rand(1, $totalCoefficient);
@@ -48,6 +51,7 @@ class LuckyWheelController extends Controller {
                         $selectedAward->inventory -= 1;
                         $selectedAward->save();
                     } else {
+                        DB::rollBack();
                         return response()->json(['error' => 'Award out of stock'], 409);
                     }
                 }
@@ -58,12 +62,14 @@ class LuckyWheelController extends Controller {
                     'time' => Carbon::now(),
                 ]);
 
+                DB::commit();
                 return response()->json(['title' => $selectedAward->title]);
             }
 
-
+            DB::rollBack();
             return response()->json(['error' => 'No award selected'], 503);
         } catch (\Exception $e) {
+            DB::rollBack();
             return response()->json(['error' => 'An error occurred'], 500);
         }
     }
